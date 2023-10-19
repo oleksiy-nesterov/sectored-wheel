@@ -62,7 +62,6 @@ class SectoredWheelItemElement extends CustomElement {
         const template = document.createElement('template');
         template.innerHTML = `<style>
             :host {
-                counter-increment: section;
                 display: flex;
                 flex-direction: row;
                 justify-content: flex-end;
@@ -74,7 +73,7 @@ class SectoredWheelItemElement extends CustomElement {
                 left: 50%;
                 width: var(--radius);
                 height: var(--sector-height);
-                font-size: calc(var(--sector-height) * 0.2);
+                font-size: min(calc(var(--sector-height) * 0.2), calc(var(--radius) / 8));
                 font-weight: bold;
                 font-family: sans-serif;
                 text-transform: uppercase;
@@ -89,8 +88,8 @@ class SectoredWheelItemElement extends CustomElement {
                 aspect-ratio: 1/1;
                 position: absolute;
                 right: 0;
-                transform-origin: calc((var(--radius) - var(--width) * 1.5) * -1) 0;
-                transform: rotate(calc(var(--sector-angle) / 2));
+                transform-origin: calc((var(--radius) - var(--width)) * -1) 50%;
+                transform: rotate(calc(var(--sector-angle) / 2)) translateX(calc(var(--border) * -1));
                 border-radius: 50%;
                 box-shadow:
                     inset rgba(0,0,0,0.1) 0 0 0 var(--border),
