@@ -1,10 +1,11 @@
 # sectored-wheel
 Random Sectored Wheel
-> No dependencies, vanilla JS
+> No dependencies, vanilla JS, Web Component
 
+Demo https://oleksiy-nesterov.github.io/sectored-wheel
 
 <p align="center" width="100%">
-    <img width="50%" src="https://raw.githubusercontent.com/oleksiy-nesterov/sectored-wheel/main/ua.svg" />
+    <img width="50%" src="https://raw.githubusercontent.com/oleksiy-nesterov/sectored-wheel/main/wheel.png" />
 </p>
 
 ### Usage
@@ -42,5 +43,10 @@ Random Sectored Wheel
 | size     | Wheel size       | 200vh                  | 100px       |
 | rimColor | Rim color        | red, #gold, rgb(0,0,0) | transparent |
 | colors   | Sector color     | red;green;blue         | transparent |
+
+### Links
+
+CodePen Playground https://codepen.io/webmotoric/pen/JjwQeQR?editors=1001
+
 
 
