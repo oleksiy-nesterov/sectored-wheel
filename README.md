@@ -4,7 +4,7 @@ Random Sectored Wheel
 
 
 <p align="center" width="100%">
-    <img width="50%" src="https://raw.githubusercontent.com/oleksiy-nesterov/sectored-wheel/main/ua.svg" />
+    <img width="50%" src="https://raw.githubusercontent.com/oleksiy-nesterov/sectored-wheel/main/wheel.png" />
 </p>
 
 ### Usage
