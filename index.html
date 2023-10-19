@@ -15,6 +15,11 @@
             color: #fff;
             font-family: sans-serif;
         }
+        body > div{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
         a, a:hover {
             color: #fff;
             text-decoration: none;
@@ -24,26 +29,56 @@
     <script src="index.js"></script>
 </head>
 <body>
-    <sectored-wheel
-        colors="#7bbbd6;#294b7b;#cae4e3"
-        rim-color="#f6c946"
-        onclick="this.index = Math.round(Math.random() * 11)"
-        onchange="console.warn(this.index)"
-        size="600px"
-    >
-        <sectored-wheel-item>0</sectored-wheel-item>
-        <sectored-wheel-item>1</sectored-wheel-item>
-        <sectored-wheel-item>2</sectored-wheel-item>
-        <sectored-wheel-item>3</sectored-wheel-item>
-        <sectored-wheel-item>4</sectored-wheel-item>
-        <sectored-wheel-item>5</sectored-wheel-item>
-        <sectored-wheel-item>6</sectored-wheel-item>
-        <sectored-wheel-item>7</sectored-wheel-item>
-        <sectored-wheel-item>8</sectored-wheel-item>
-        <sectored-wheel-item>9</sectored-wheel-item>
-        <sectored-wheel-item>10</sectored-wheel-item>
-        <sectored-wheel-item>11</sectored-wheel-item>
-    </sectored-wheel>
+    <div>
+        <sectored-wheel
+            colors="#007F5F;#2B9348;#55A630;#80B918;#AACC00;#BFD200;#D4D700;#DDDF00;#EEEF20;"
+            onclick="this.index = Math.round(Math.random() * 2)"
+            size="200px"
+        >
+            <sectored-wheel-item style="color:#fff;font-size:40px;">1</sectored-wheel-item>
+            <sectored-wheel-item style="color:#fff;font-size:40px;">2</sectored-wheel-item>
+            <sectored-wheel-item style="color:#fff;font-size:40px;">3</sectored-wheel-item>
+            <sectored-wheel-item style="color:#fff;font-size:40px;">4</sectored-wheel-item>
+            <sectored-wheel-item style="color:#fff;font-size:40px;">5</sectored-wheel-item>
+            <sectored-wheel-item style="color:#fff;font-size:40px;">6</sectored-wheel-item>
+            <sectored-wheel-item style="color:#fff;font-size:40px;">7</sectored-wheel-item>
+            <sectored-wheel-item style="color:#fff;font-size:40px;">8</sectored-wheel-item>
+            <sectored-wheel-item style="color:#fff;font-size:40px;">9</sectored-wheel-item>
+        </sectored-wheel>
+
+        <sectored-wheel
+            colors="#7bbbd6;#294b7b;#cae4e3"
+            rim-color="#f6c946"
+            onclick="this.index = Math.round(Math.random() * 11)"
+            onchange="console.warn(this.index)"
+            size="600px"
+            style="margin:20px;"
+        >
+            <sectored-wheel-item>0</sectored-wheel-item>
+            <sectored-wheel-item>1</sectored-wheel-item>
+            <sectored-wheel-item>2</sectored-wheel-item>
+            <sectored-wheel-item>3</sectored-wheel-item>
+            <sectored-wheel-item>4</sectored-wheel-item>
+            <sectored-wheel-item>5</sectored-wheel-item>
+            <sectored-wheel-item>6</sectored-wheel-item>
+            <sectored-wheel-item>7</sectored-wheel-item>
+            <sectored-wheel-item>8</sectored-wheel-item>
+            <sectored-wheel-item>9</sectored-wheel-item>
+            <sectored-wheel-item>10</sectored-wheel-item>
+            <sectored-wheel-item>11</sectored-wheel-item>
+        </sectored-wheel>
+
+        <sectored-wheel
+            colors="#ff7096;#ff85a1;#ff99ac"
+            rim-color="red"
+            onclick="this.index = Math.round(Math.random() * 2)"
+            size="200px"
+        >
+            <sectored-wheel-item style="justify-content:center;font-size:40px;"><span style="transform:rotate(90deg)">❤️</span></sectored-wheel-item>
+            <sectored-wheel-item style="justify-content:center;font-size:40px;"><span style="transform:rotate(90deg)">💔</span></sectored-wheel-item>
+            <sectored-wheel-item style="justify-content:center;font-size:40px;"><span style="transform:rotate(90deg)">💔</span></sectored-wheel-item>
+        </sectored-wheel>
+    </div>
 
     <br /><br /><br />
     <a href="https://github.com/oleksiy-nesterov/sectored-wheel" target="_blank">github</a>

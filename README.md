@@ -5,7 +5,7 @@ Random Sectored Wheel
 Demo https://oleksiy-nesterov.github.io/sectored-wheel
 
 <p align="center" width="100%">
-    <img width="50%" src="https://raw.githubusercontent.com/oleksiy-nesterov/sectored-wheel/main/wheel.png" />
+    <img width="70%" src="https://raw.githubusercontent.com/oleksiy-nesterov/sectored-wheel/main/wheel.png" />
 </p>
 
 ### Usage
