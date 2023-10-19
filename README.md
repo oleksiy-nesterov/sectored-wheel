@@ -1,6 +1,6 @@
 # sectored-wheel
 Random Sectored Wheel
-> No dependencies, vanilla JS
+> No dependencies, vanilla JS, Web Component
 
 
 <p align="center" width="100%">
@@ -42,5 +42,10 @@ Random Sectored Wheel
 | size     | Wheel size       | 200vh                  | 100px       |
 | rimColor | Rim color        | red, #gold, rgb(0,0,0) | transparent |
 | colors   | Sector color     | red;green;blue         | transparent |
+
+### Links
+
+CodePen Playground https://codepen.io/webmotoric/pen/JjwQeQR?editors=1001
+
 
 
