@@ -121,6 +121,22 @@ class SectoredWheelElement extends CustomElement {
     #rimColor;
     #size;
 
+    cssVarsForcing = (cssText) => {
+        // prevent the outside rewriting of vars
+        if (this.#size && cssText.indexOf('--radius') === -1) {
+            this.size = this.#size;
+        }
+        if (this.#rimColor && cssText.indexOf('--rim-color') === -1) {
+            this.rimColor = this.#rimColor;
+        }
+        if (this.#colors && this.#colors.length && cssText.indexOf('--color1') === -1) {
+           this.setColors(this.#colors, true);
+        }
+        if (this.#sectorsCount && cssText.indexOf('--sectors-count') === -1) {
+            this.style.setProperty('--sectors-count', this.#sectorsCount);
+        }
+    }
+
     realign = () => {
         const gradient = [];
         const items = this.querySelectorAll('sectored-wheel-item');
@@ -132,27 +148,29 @@ class SectoredWheelElement extends CustomElement {
         }
         this.#slot.style.background = `conic-gradient(from calc(90deg - var(--sector-angle) / 2), ${gradient.join(', ')})`;
 
-        items.forEach((el,  i) => {
+        items.forEach((el, i) => {
             el.style.transform = `rotate(calc(var(--sector-angle) * ${i}))`;
         })
     }
 
     static get observedAttributes() {
-        return ['colors', 'rim-color', 'size', 'index'];
+        return ['colors', 'rim-color', 'size', 'index', 'style'];
     }
 
     attributeChangedCallback(attributeName, oldValue, newValue) {
         if (oldValue !== newValue) {
             switch (attributeName) {
                 case 'colors':
-                    this.colors = newValue;
-                break;
+                    this.setColors(newValue);
+                    break;
                 case 'rim-color':
                     this.rimColor = newValue;
-                break;
+                    break;
                 case 'size':
                     this.size = newValue;
-                break;
+                case 'style':
+                    this.cssVarsForcing(newValue);
+                    break;
             }
         }
         if (attributeName === 'index') {
@@ -165,15 +183,15 @@ class SectoredWheelElement extends CustomElement {
             const angle = 360 / this.#sectorsCount;
             this.#rotation -= 360 + (angle *
                 (fromIndex < toIndex ?
-                Math.abs(toIndex - fromIndex) :
-                Math.abs((this.#sectorsCount - fromIndex) + toIndex))
+                    Math.abs(toIndex - fromIndex) :
+                    Math.abs((this.#sectorsCount - fromIndex) + toIndex))
             );
-            this.#slot.style.transform = `rotate(${this.#rotation-90}deg)`;
+            this.#slot.style.transform = `rotate(${this.#rotation - 90}deg)`;
         }
     }
 
     set index(v) {
-        const newIndex= parseInt(v || 0, 10);
+        const newIndex = parseInt(v || 0, 10);
         if (this.#sectorsCount) {
             this.#init = false;
             this.rotate(this.#index, newIndex);
@@ -203,8 +221,8 @@ class SectoredWheelElement extends CustomElement {
         return this.#rimColor;
     }
 
-    set colors(v) {
-        if (this.#colors.length) {
+    setColors(v, doNotClean) {
+        if (!doNotClean && this.#colors.length) {
             this.#colors.forEach((v, i) => {
                 this.style.removeProperty(`--color${i}`);
             });
@@ -220,10 +238,6 @@ class SectoredWheelElement extends CustomElement {
             return name;
         });
         this.#colorsGenerator = itemsGenerator(list);
-    }
-
-    get colors() {
-        return this.#colors;
     }
 
     onConnect() {
@@ -301,8 +315,7 @@ class SectoredWheelElement extends CustomElement {
         this.shadow.appendChild(template.content);
         this.#slot = this.shadow.querySelector('slot.wheel');
         this.#observer = new MutationObserver(this.realign);
-        this.#observer.observe(this, { childList: true });
-
+        this.#observer.observe(this, {childList: true});
 
         this.#slot.addEventListener('transitionend', () => {
             if (!this.#init) {

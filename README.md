@@ -44,6 +44,46 @@ Demo https://oleksiy-nesterov.github.io/sectored-wheel
 | rimColor | Rim color        | red, #gold, rgb(0,0,0) | transparent |
 | colors   | Sector color     | red;green;blue         | transparent |
 
+
+### Integration
+
+#### Angular
+> Add CUSTOM_ELEMENTS_SCHEMA to the component
+```javascript
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
+@Component({
+    selector: 'app-my-component',
+    standalone: true,
+    templateUrl: './app-my.component.html',
+    styleUrl: './app-my.component.scss',
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
+})
+export class AppMyComponent {
+    //...
+}
+```
+
+> Or add CUSTOM_ELEMENTS_SCHEMA to the module
+```javascript
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+
+@NgModule({
+    ...
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
+})
+export class SomeModule {
+    //...
+}
+```
+
+> angular.json, add .js file to the script list
+```
+"scripts": [
+    "node_modules/sectored-wheel/sectored-wheel.min.js"
+]
+```
+
 ### Links
 
 CodePen Playground https://codepen.io/webmotoric/pen/JjwQeQR?editors=1001
