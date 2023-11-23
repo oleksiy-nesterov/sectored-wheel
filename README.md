@@ -1,6 +1,6 @@
 # sectored-wheel
-Random Sectored Wheel
-> No dependencies, vanilla JS, Web Component
+Randomized Sectored Wheel
+> No dependencies, vanilla JS, Web Component.
 
 Demo https://oleksiy-nesterov.github.io/sectored-wheel
 

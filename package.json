@@ -1,0 +1,28 @@
+{
+  "name": "sectored-wheel",
+  "version": "1.0.0",
+  "description": "Randomized Sectored Wheel. No dependencies, vanilla JS, Web Component.",
+  "author": {
+    "name": "Oleksiy Nesterov",
+    "email": "oleksiy.nesterov@gmail.com"
+  },
+  "mail": "dist/sectored-wheel.min.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/oleksiy-nesterov/sectored-wheel.git",
+    "directory": "dist"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/oleksiy-nesterov"
+  },
+  "scripts": {
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["javascript", "webcomponent"],
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}
