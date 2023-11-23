@@ -1,6 +1,6 @@
 {
   "name": "sectored-wheel",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Randomized Sectored Wheel. No dependencies, vanilla JS, Web Component.",
   "author": {
     "name": "Oleksiy Nesterov",

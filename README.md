@@ -8,6 +8,21 @@ Demo https://oleksiy-nesterov.github.io/sectored-wheel
     <img width="70%" src="https://raw.githubusercontent.com/oleksiy-nesterov/sectored-wheel/main/wheel.png" />
 </p>
 
+### Installation
+
+```html
+<script src="https://oleksiy-nesterov.github.io/sectored-wheel/dist/sectored-wheel.min.js"></script>
+```
+or
+
+```
+npm install sectored-wheel
+```
+or
+```
+npm install git+https://github.com/oleksiy-nesterov/sectored-wheel.git#v1.0.1
+```
+
 ### Usage
 
 ```html
