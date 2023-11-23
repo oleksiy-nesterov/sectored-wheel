@@ -1,6 +1,6 @@
 {
   "name": "sectored-wheel",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Randomized Sectored Wheel. No dependencies, vanilla JS, Web Component.",
   "author": {
     "name": "Oleksiy Nesterov",
@@ -19,7 +19,10 @@
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["javascript", "webcomponent"],
+  "keywords": [
+    "javascript",
+    "webcomponent"
+  ],
   "license": "ISC",
   "devDependencies": {
     "webpack": "^5.89.0",
