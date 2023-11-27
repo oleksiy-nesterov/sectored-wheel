@@ -1,6 +1,6 @@
 {
   "name": "sectored-wheel",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Randomized Sectored Wheel. No dependencies, vanilla JS, Web Component.",
   "author": {
     "name": "Oleksiy Nesterov",
@@ -24,6 +24,10 @@
     "webcomponent"
   ],
   "license": "ISC",
+  "funding": {
+    "type": "patreon",
+    "url": "https://www.patreon.com/user?u=40023107"
+  },
   "devDependencies": {
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
