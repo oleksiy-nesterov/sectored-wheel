@@ -5,7 +5,10 @@
     <title>Sectored Wheel Demo</title>
     <style>
         body {
-            background: linear-gradient(#313968, #0e1438);
+            --normal-color: #de0000;
+            --dark-color: #b50000;
+            --opacity-color: rgba(255, 0, 0, 0.15);
+            background: linear-gradient(#313131, #080808);
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -19,22 +22,232 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            gap: 20px;
         }
         a, a:hover {
             color: #fff;
             text-decoration: none;
             padding: 10px;
         }
+        a:hover {
+            color: var(--dark-color);
+        }
+        sectored-wheel {
+            cursor: pointer;
+        }
+        button {
+            background-color: #3b3b3b;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+            box-sizing: border-box;
+            color: #fff;
+            cursor: pointer;
+            display: inline-block;
+            font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            line-height: 1.15385;
+            margin: 0;
+            outline: none;
+            padding: 8px .8em;
+            position: relative;
+            text-align: center;
+            text-decoration: none;
+            user-select: none;
+            touch-action: manipulation;
+            vertical-align: baseline;
+            white-space: nowrap;
+        }
+        button:hover,
+        button:focus {
+            background-color: #626262;
+        }
+        button:focus {
+            box-shadow: 0 0 0 4px var(--opacity-color);
+        }
+        button:active {
+            background-color: var(--dark-color);
+            box-shadow: none;
+        }
+        .block {
+            text-align: center;
+            padding: 30px;
+        }
+        .pattern {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='12' viewBox='0 0 20 12'%3E%3Cg fill-rule='evenodd'%3E%3Cg id='charlie-brown' fill='%23cae4e3' fill-opacity='0.1'%3E%3Cpath d='M9.8 12L0 2.2V.8l10 10 10-10v1.4L10.2 12h-.4zm-4 0L0 6.2V4.8L7.2 12H5.8zm8.4 0L20 6.2V4.8L12.8 12h1.4zM9.8 0l.2.2.2-.2h-.4zm-4 0L10 4.2 14.2 0h-1.4L10 2.8 7.2 0H5.8z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .wheel1::after {
+            content: "";
+            position: absolute;
+            aspect-ratio: 1/1;
+            border-radius: 50%;
+            width: 100%;
+            box-shadow:
+                inset rgba(0,0,0,0.1) 0 0 0 5px,
+                inset #333333 0 0 0 12px,
+                rgba(0,0,0,0.1) 0 0 0 10px;
+        }
+        .wheel1::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            aspect-ratio: 1/1;
+            border-radius: 50% 50% 25% 50%;
+            transform: translateY(-50%) rotate(-45deg);
+            background-color: #505050;
+            width: 50px;
+            z-index: 1;
+            box-shadow:
+                inset rgba(0,0,0,0.1) 0 0 0 5px,
+                inset #333333 0 0 0 12px,
+                rgba(0,0,0,0.1) 0 0 0 10px;
+        }
+        .wheel2 {
+            cursor: default;
+            pointer-events: none;
+        }
+        .wheel2::after {
+            content: "";
+            position: absolute;
+            aspect-ratio: 1/1;
+            border-radius: 50%;
+            width: 100%;
+            pointer-events: none;
+            box-shadow:
+                inset rgba(0,0,0,0.1) 0 0 0 5px,
+                inset #333333 0 0 0 12px,
+                rgba(0,0,0,0.1) 0 0 0 10px;
+        }
+        .wheel2::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            aspect-ratio: 1/1;
+            border-radius: 50% 50% 50% 25%;
+            transform: translateY(-60%) rotate(-45deg);
+            background-color: var(--dark-color);
+            width: 50px;
+            z-index: 1;
+            box-shadow:
+                inset rgba(0,0,0,0.1) 0 0 0 5px,
+                inset var(--normal-color) 0 0 0 15px,
+                rgba(0,0,0,0.1) 0 0 0 10px;
+        }
+        .wheel2 > span {
+            display: inline-block;
+            position: absolute;
+            aspect-ratio: 1/1;
+            border-radius: 50%;
+            background-color: #505050;
+            width: 50px;
+            z-index: 1;
+            box-shadow:
+                inset rgba(0,0,0,0.1) 0 0 0 5px,
+                inset #333333 0 0 0 15px,
+                rgba(0,0,0,0.1) 0 0 0 10px;
+        }
+        .wheel2 > sectored-wheel-item {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: calc(var(--sector-height) * 0.3);
+        }
+        .wheel2 > sectored-wheel-item.selected {
+            color: var(--normal-color);
+        }
+        .wheel2 > sectored-wheel-item.preselected {
+            color: white;
+        }
+        .wheel3::after {
+            content: "";
+            position: absolute;
+            aspect-ratio: 1/1;
+            border-radius: 50%;
+            width: 100%;
+            box-shadow:
+                inset rgba(0,0,0,0.1) 0 0 0 5px,
+                inset #333333 0 0 0 12px,
+                rgba(0,0,0,0.1) 0 0 0 10px;
+        }
+        .wheel3::before {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            aspect-ratio: 1/1;
+            border-radius: 50% 25% 50% 50%;
+            transform: translateY(40%) rotate(-45deg);
+            background-color: #505050;
+            width: 50px;
+            z-index: 1;
+            box-shadow:
+                inset rgba(0,0,0,0.1) 0 0 0 5px,
+                inset #333333 0 0 0 15px,
+                rgba(0,0,0,0.1) 0 0 0 10px;
+        }
+        .wheel3 > sectored-wheel-item::after {
+            --width: 15px;
+            --distance: calc(var(--sector-width) - 25px - var(--width) / 2);
+            content: "";
+            position: absolute;
+            left: var(--distance);
+            top: 50%;
+            height: var(--width);
+            width: var(--width);
+            margin-top: calc(var(--width) / -2);
+            background-color: var(--normal-color);
+            border-radius: 50%;
+            transform-origin: calc(var(--distance) * -1) 50%;
+            transform: rotate(calc(var(--sector-angle) / 2));
+            z-index: 1;
+        }
     </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script>
+        const onChange = (wheel) => {
+            const content = wheel.querySelectorAll('sectored-wheel-item')[wheel.index]?.innerText;
+            if (content) {
+                Toastify({
+                    text: wheel.querySelectorAll('sectored-wheel-item')[wheel.index]?.innerText,
+                    className: 'info',
+                    duration: 10000,
+                    style: {
+                        boxShadow: 'none',
+                        borderRadius: '5px',
+                        background: 'linear-gradient(135deg,#535353,#282828)'
+                    }
+                }).showToast();
+            }
+        }
+        const asyncIndex = () => {
+            const wheel = document.querySelector('.wheel2');
+            if (wheel.inSpinning || wheel.inRotation) {
+                return;
+            }
+            wheel.setIndexAsync(async () => {
+               return new Promise((resolve, reject) => {
+                   setTimeout(() => {
+                       resolve(Math.round(Math.random() * 11));
+                       // reject('Just a Error');
+                   }, 3000);
+               });
+            });
+        }
+    </script>
+
     <script src="index.js"></script>
 </head>
 <body>
     <div>
         <sectored-wheel
+            direction="acw"
             colors="#007F5F;#2B9348;#55A630;#80B918;#AACC00;#BFD200;#D4D700;#DDDF00;#EEEF20;"
-            onclick="this.index = Math.round(Math.random() * 2)"
-            size="200px"
+            onclick="this.index = Math.round(Math.random() * 9)"
+            onchange="onChange(this)"
+            size="300px"
+            class="wheel1"
         >
+            <sectored-wheel-item style="color:#fff;font-size:40px;">0</sectored-wheel-item>
             <sectored-wheel-item style="color:#fff;font-size:40px;">1</sectored-wheel-item>
             <sectored-wheel-item style="color:#fff;font-size:40px;">2</sectored-wheel-item>
             <sectored-wheel-item style="color:#fff;font-size:40px;">3</sectored-wheel-item>
@@ -43,36 +256,49 @@
             <sectored-wheel-item style="color:#fff;font-size:40px;">6</sectored-wheel-item>
             <sectored-wheel-item style="color:#fff;font-size:40px;">7</sectored-wheel-item>
             <sectored-wheel-item style="color:#fff;font-size:40px;">8</sectored-wheel-item>
-            <sectored-wheel-item style="color:#fff;font-size:40px;">9</sectored-wheel-item>
         </sectored-wheel>
 
-        <sectored-wheel
-            colors="#7bbbd6;#294b7b;#cae4e3"
-            rim-color="#f6c946"
-            onclick="this.index = Math.round(Math.random() * 11)"
-            onchange="console.warn(this.index)"
-            size="600px"
-            style="margin:20px;"
-        >
-            <sectored-wheel-item>0</sectored-wheel-item>
-            <sectored-wheel-item>1</sectored-wheel-item>
-            <sectored-wheel-item>2</sectored-wheel-item>
-            <sectored-wheel-item>3</sectored-wheel-item>
-            <sectored-wheel-item>4</sectored-wheel-item>
-            <sectored-wheel-item>5</sectored-wheel-item>
-            <sectored-wheel-item>6</sectored-wheel-item>
-            <sectored-wheel-item>7</sectored-wheel-item>
-            <sectored-wheel-item>8</sectored-wheel-item>
-            <sectored-wheel-item>9</sectored-wheel-item>
-            <sectored-wheel-item>10</sectored-wheel-item>
-            <sectored-wheel-item>11</sectored-wheel-item>
-        </sectored-wheel>
+        <div>
+            <sectored-wheel
+                direction="acw"
+                colors="#525252;#8b8b8b;#7d7d7d"
+                onclick="this.spin(); setTimeout(() => {this.index = Math.round(Math.random() * 11)}, 2000) "
+                onchange="onChange(this)"
+                size="600px"
+                azimuth="-90deg"
+                rotation-time="10s"
+                rotation-acceleration="2"
+                class="wheel2"
+            >
+                <sectored-wheel-item class="pattern" clipping>0</sectored-wheel-item>
+                <sectored-wheel-item>1</sectored-wheel-item>
+                <sectored-wheel-item>2</sectored-wheel-item>
+                <sectored-wheel-item>3</sectored-wheel-item>
+                <sectored-wheel-item>4</sectored-wheel-item>
+                <sectored-wheel-item>5</sectored-wheel-item>
+                <sectored-wheel-item>6</sectored-wheel-item>
+                <sectored-wheel-item>7</sectored-wheel-item>
+                <sectored-wheel-item>8</sectored-wheel-item>
+                <sectored-wheel-item>9</sectored-wheel-item>
+                <sectored-wheel-item>10</sectored-wheel-item>
+                <sectored-wheel-item>11</sectored-wheel-item>
+                <span></span>
+            </sectored-wheel>
+            <div class="block">
+                <button onclick="asyncIndex()">Set Index Async</button>
+            </div>
+        </div>
 
         <sectored-wheel
-            colors="#ff7096;#ff85a1;#ff99ac"
-            rim-color="red"
-            onclick="this.index = Math.round(Math.random() * 2)"
-            size="200px"
+            azimuth="0.25turn"
+            colors="#525252;#8b8b8b;#7d7d7d"
+            onclick="!this.inRotation && (this.index = Math.round(Math.random() * 2))"
+            onchange="onChange(this)"
+            size="300px"
+            padding="25"
+            stroke="3"
+            stroke-color="#b50000"
+            class="wheel3"
         >
             <sectored-wheel-item style="justify-content:center;font-size:40px;"><span style="transform:rotate(90deg)">❤️</span></sectored-wheel-item>
             <sectored-wheel-item style="justify-content:center;font-size:40px;"><span style="transform:rotate(90deg)">💔</span></sectored-wheel-item>
@@ -80,8 +306,9 @@
         </sectored-wheel>
     </div>
 
-    <br /><br /><br />
-    <a href="https://github.com/oleksiy-nesterov/sectored-wheel" target="_blank">github</a>
-    <a href="https://codepen.io/webmotoric/pen/JjwQeQR?editors=1001" target="_blank">codepen</a>
+    <p>
+        <a href="https://github.com/oleksiy-nesterov/sectored-wheel" target="_blank">github</a>
+        <a href="https://codepen.io/webmotoric/pen/JjwQeQR?editors=1001" target="_blank">codepen</a>
+    </p>
 </body>
 </html>

@@ -2,7 +2,7 @@
 Randomized Sectored Wheel
 > No dependencies, vanilla JS, Web Component.
 
-Demo https://oleksiy-nesterov.github.io/sectored-wheel
+Demo / Code Example https://oleksiy-nesterov.github.io/sectored-wheel
 
 <p align="center" width="100%">
     <img width="70%" src="https://raw.githubusercontent.com/oleksiy-nesterov/sectored-wheel/main/wheel.png" />
@@ -50,19 +50,49 @@ npm install git+https://github.com/oleksiy-nesterov/sectored-wheel.git#v1.0.2
     wheel.index = 3;
 ```
 
-### Props
+### Props and Attributes
 
-| Prop      | Description      | Example                | Default     |
-|-----------|------------------|------------------------|-------------|
-| index     | Selected sector  | 1                      | 0           |
-| size      | Wheel size       | 200vh                  | 100px       |
-| rim-color | Rim color        | red, #gold, rgb(0,0,0) | transparent |
-| colors    | Sector color     | red;green;blue         | transparent |
+| Wheel's Props & Attributes                  | Description                                                                                         | Example               | Default     |
+|---------------------------------------------|-----------------------------------------------------------------------------------------------------|-----------------------|-------------|
+| index                                       | Selected sector                                                                                     | 1                     | 0           |
+| size                                        | Wheel size                                                                                          | 200vh                 | 100px       |
+| colors                                      | Sector color                                                                                        | red;green;blue        | transparent |
+| stroke                                      | Stroke size in px                                                                                   | 10                    | 0           |
+| strokeColor, stroke-color                   | Stroke color                                                                                        | red, rgba(0,0,0,0.5)  | transparent |
+| padding                                     | inset padding in pixels                                                                             | 10                    | 0           |
+| direction                                   | Rotate direction                                                                                    | cw, acw               | cw          |
+| azimuth                                     | Wheel azimuth                                                                                       | -90deg, 0.25turn, etc | 0           |
+| rotationAcceleration, rotation-acceleration | how many full rotations should be done each time                                                    | 2                     | 1           |
+| rotationTime, rotation-time                 | Rotation time                                                                                       | 10s, 200ms, etc       | 5s          |
+| inRotation                                  | Read Only, allow to determine the wheel rotation                                                    | true, false           | false       |
+| inSpinning                                  | Read Only, allow to determine the wheel spinning                                                    | true, false           | false       |
+| spin                                        | Method to make wheel infinity spinning                                                              | true, false           | false       |
+| setIndexAsync                               | Method to set Index async. The first parameter is an async function which should return a new Index | true, false           | false       |
 
+| Sector's Attributes                         | Description                                      |
+|---------------------------------------------|--------------------------------------------------|
+| clipping                                    | Clip content                                     |
+| color                                       | Sector color                                     |
+
+### CSS vars, which can used for custom styles
+
+| Var                    | Description             |
+|------------------------|-------------------------|
+| --count                | Amount of sectors       |
+| --sector-height        | Sector height           |
+| --sector-width         | Sector width            |
+| --sector-angle         | Stroke angle            |
+
+### CSS classes, which can used for custom styles
+
+| Class                            | Description                  |
+|----------------------------------|------------------------------|
+| sectored-wheel-item.selected     | Selected sector              |
+| sectored-wheel-item.preselected  | Default (preselected) sector |
 
 #
 
-### Integration
+### Integration 
 
 #### Angular Component Wrapper
 
@@ -208,6 +238,3 @@ declare namespace JSX {
 ### Links
 
 CodePen Playground https://codepen.io/webmotoric/pen/JjwQeQR?editors=1001
-
-
-

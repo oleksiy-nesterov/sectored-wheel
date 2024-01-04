@@ -1,14 +1,3 @@
-const itemsGenerator = function* (list) {
-    let i = 0;
-    while (true) {
-        if (i >= list.length) {
-            i = 0;
-        }
-        yield list[i];
-        i++;
-    }
-};
-
 class CustomElement extends HTMLElement {
     shadow = null;
 
@@ -33,10 +22,6 @@ class CustomElement extends HTMLElement {
             const source = this.getAttribute(`on${eventName}`);
             if (source) {
                 const func = new Function('e', `var event = e; return ${source}`);
-                //const result = func.call(this, event);
-                if (typeof result === 'function') {
-                    // result.call(this, event);
-                }
             } else {
                 this.dispatchEvent(event);
             }
@@ -66,40 +51,36 @@ class SectoredWheelItemElement extends CustomElement {
                 flex-direction: row;
                 justify-content: flex-end;
                 align-items: center;
-                padding-right: calc(var(--radius) * 0.15);
                 box-sizing: border-box;
                 position: absolute;
                 color: #000;
                 left: 50%;
-                width: var(--radius);
-                height: var(--sector-height);
-                font-size: min(calc(var(--sector-height) * 0.2), calc(var(--radius) / 8));
                 font-weight: bold;
                 font-family: sans-serif;
                 text-transform: uppercase;
                 transform-origin: 0 50%;
                 z-index: 1;
+                width: var(--sector-width);
+                height: var(--sector-height);
+                padding-right: calc(var(--sector-width) * 0.15);
+                font-size: min(calc(var(--sector-height) * 0.2), calc(var(--sector-width) / 8));
             }
-            :host::before {
-                --width: calc(var(--radius) / 15);
-                --border: calc(var(--width) / 4);
-                content: "";
-                width: var(--width);
-                aspect-ratio: 1/1;
-                position: absolute;
-                right: 0;
-                transform-origin: calc((var(--radius) - var(--width)) * -1) 50%;
-                transform: rotate(calc(var(--sector-angle) / 2)) translateX(calc(var(--border) * -1));
-                border-radius: 50%;
-                box-shadow:
-                    inset rgba(0,0,0,0.1) 0 0 0 var(--border),
-                    inset var(--rim-color) 0 0 0 var(--width),
-                    rgba(0,0,0,0.1) calc(var(--border) * -1) 0 0 0;
-            }
-        </style><slot class="sector"></slot>`;
+        </style><slot></slot>`;
 
         this.shadow.appendChild(template.content);
-        this.#slot = this.shadow.querySelector('slot.sector');
+        this.#slot = this.shadow.querySelector(':host > slot');
+    }
+
+    static get observedAttributes() {
+        return ['clipping'];
+    }
+
+    attributeChangedCallback(attributeName, oldValue, newValue) {
+        if (this.hasAttribute('clipping')) {
+            this.style.clipPath = 'polygon(0 50%, 100% 0, 100% 100%)';
+        } else {
+            this.style.clipPath = 'none';
+        }
     }
 }
 
@@ -109,135 +90,323 @@ if (!window.customElements.get('sectored-wheel-item')) {
 }
 
 class SectoredWheelElement extends CustomElement {
+    MIN_SIZE = '100px';
+    PI2 = Math.PI * 2;
+
     #observer;
-    #slot;
+    #wheel;
+    #canvas;
+    #ctx;
+
     #rotation = 0;
-    #index = 0;
-    #sectorsCount = 0;
     #init = true;
+    #items = [];
 
-    #colors = [];
-    #colorsGenerator = itemsGenerator([]);
-    #rimColor;
-    #size;
+    #getDebounceCallback = (callback, time) => {
+        // run callback one time after an interval
+        let debounceTimer;
+        return () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(callback, time);
+        };
+    };
 
-    cssVarsForcing = (cssText) => {
-        // prevent the outside rewriting of vars
-        if (this.#size && cssText.indexOf('--radius') === -1) {
-            this.size = this.#size;
+    #toRad = (angle = '0') => {
+        // 90deg = 100grad = 0.25turn ≈ 1.5708rad
+        const value = parseFloat(angle);
+        if (angle.indexOf('deg') > 0) {
+            return value * Math.PI / 180;
+        } else if (angle.indexOf('grad') > 0) {
+            return value / 400 * this.PI2;
+        } else if (angle.indexOf('turn') > 0) {
+            return value * this.PI2;
         }
-        if (this.#rimColor && cssText.indexOf('--rim-color') === -1) {
-            this.rimColor = this.#rimColor;
+        return value;
+    };
+
+    #getActualAngle = () => {
+        const actualStyles = getComputedStyle(this.#wheel);
+        const actualTransformMatrix = actualStyles.transform.replace(/[^\d\.\-e,]+/g, '').split(',');
+        return Math.atan2(actualTransformMatrix[1], actualTransformMatrix[0]);
+    };
+
+    #getRotationFromIndex = (fromIndex, toIndex, acceleration) => {
+        const from = Math.max(fromIndex, 0);
+        const to = Math.max(Math.min(toIndex, this.#items.length - 1), 0);
+        const angle = this.PI2 / this.#items.length;
+
+        if (this.#direction === 'cw') {
+            return (this.PI2 * acceleration) + (angle * (from < to ? this.#items.length - (to - from) : from - to));
+        } else {
+            return ((this.PI2 * acceleration) + (angle * (from < to ? to - from : this.#items.length - (from - to)))) * -1;
         }
-        if (this.#colors && this.#colors.length && cssText.indexOf('--color1') === -1) {
-           this.setColors(this.#colors, true);
+    };
+
+    #getRotationFromAngle = (fromAngle, toIndex, acceleration) => {
+        const to = Math.max(Math.min(toIndex, this.#items.length - 1), 0);
+        const angle = this.PI2 / this.#items.length;
+        let realAngle;
+
+        if (this.#direction === 'cw') {
+            realAngle = this.PI2 - Math.abs(fromAngle);
+            return (this.PI2 * acceleration) + realAngle + (this.#items.length - to) * angle + Math.abs(fromAngle);
+        } else {
+            realAngle = Math.abs(fromAngle) - this.PI2;
+            return realAngle - to * angle - Math.abs(fromAngle) - (this.PI2 * acceleration);
         }
-        if (this.#sectorsCount && cssText.indexOf('--sectors-count') === -1) {
-            this.style.setProperty('--sectors-count', this.#sectorsCount);
+    };
+
+    #unselectItems = () => {
+        this.#items.forEach((el) => el.classList.remove('selected', 'preselected'));
+    };
+
+    rotate = (fromIndex, toIndex, noAnimate, reset) => {
+        if (this.#items.length) {
+            this.#unselectItems();
+
+            if (reset) {
+                this.#rotation = 0;
+            }
+
+            if (this.inSpinning) {
+                const actualAngle = this.#getActualAngle();
+                // stop animation
+                this.#wheel.style.animation = '';
+                this.#wheel.style.transform = `rotate(${actualAngle}rad)`;
+                this.#rotation = this.#getRotationFromAngle(actualAngle, toIndex, this.rotationAcceleration);
+            } else {
+                this.#rotation += this.#getRotationFromIndex(reset ? 0 : fromIndex, toIndex, this.rotationAcceleration);
+            }
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    // rendering issue fix
+                    this.#wheel.style.transitionDuration = noAnimate ? '0s' : this.rotationTime;
+                    this.#wheel.style.transitionTimingFunction = 'cubic-bezier(0.25, 1, 0.5, 1)';
+                    this.#wheel.style.transform = `rotate(${this.#rotation + this.#toRad(this.azimuth)}rad)`;
+                });
+            });
         }
     }
 
-    realign = () => {
-        const gradient = [];
-        const items = this.querySelectorAll('sectored-wheel-item');
-        this.#sectorsCount = items.length;
-        this.style.setProperty('--sectors-count', this.#sectorsCount);
-
-        for (let i = 0; i < this.#sectorsCount; i++) {
-            gradient.push(`var(${this.#colorsGenerator.next().value}) calc(var(--sector-angle) * ${i}) calc(var(--sector-angle) * ${i + 1})`);
+    spin = () => {
+        if (this.inSpinning) {
+            return;
         }
-        this.#slot.style.background = `conic-gradient(from calc(90deg - var(--sector-angle) / 2), ${gradient.join(', ')})`;
+        this.#unselectItems();
+        const actualAngle = this.#getActualAngle();
+        this.#wheel.style.transitionDuration = '0s';
+        this.#wheel.style.transform = 'none';
+        this.#wheel.style.transitionTimingFunction = 'linear';
+        this.#wheel.style.setProperty('--spin-angle', `${actualAngle}rad`);
+        this.#wheel.style.animation = `calc(${this.rotationTime} / ${this.rotationAcceleration} * 0.1) linear infinite ${this.#direction === 'acw' ? 'reverse' : ''} spin`;
+    }
 
-        items.forEach((el, i) => {
-            el.style.transform = `rotate(calc(var(--sector-angle) * ${i}))`;
-        })
+    realign = this.#getDebounceCallback((redrawOnly) => {
+        if (!redrawOnly) {
+            this.#items = this.querySelectorAll('sectored-wheel-item');
+        }
+
+        const angle = this.PI2 / this.#items.length;
+
+        if (this.#canvas) {
+            const width = this.#canvas.clientWidth;
+            const height = this.#canvas.clientHeight;
+            const x = width / 2;
+            const y = height / 2;
+
+            const offset = -angle / 2;
+            const radius = Math.max(width, height) / 2;
+
+            this.#canvas.width = width;
+            this.#canvas.height = height;
+            for (let i = 0; i < this.#items.length; i++) {
+                this.#ctx.beginPath();
+                this.#ctx.moveTo(x, y);
+                this.#ctx.arc(x, y, radius - this.padding - (this.stroke ? this.stroke / 2 : 0), offset + angle * i, offset + angle * (i + 1));
+                this.#ctx.lineTo(x, y);
+                this.#ctx.fillStyle = this.#items[i].getAttribute('color') || this.#colors[i % this.#colors.length];
+                this.#ctx.fill();
+                if (this.stroke) {
+                    this.#ctx.lineWidth = this.stroke;
+                    this.#ctx.strokeStyle = this.strokeColor;
+                    this.#ctx.stroke();
+                }
+            }
+        }
+
+        if (!this.#items[this.index]) {
+            this.index = -1;
+            this.#unselectItems();
+        }
+
+        if (!redrawOnly && this.#wheel) {
+            this.#wheel.style.setProperty('--count', this.#items.length);
+            this.#wheel.style.setProperty('--sector-height', `calc(${Math.PI} * ${this.size} / ${this.#items.length})`);
+            this.#wheel.style.setProperty('--sector-width', `calc(${this.size} / 2)`);
+            this.#wheel.style.setProperty('--sector-angle', `${angle}rad`);
+
+            this.#items.forEach((el, i) => {
+                el.style.transform = `rotate(${angle * i}rad)`;
+            });
+
+            this.rotate(this.index, this.index, true, true);
+        }
+
+        if (this.#init) {
+            this.#items.forEach(el => el.classList.remove('preselected'));
+            this.#items[this.index]?.classList.add('preselected');
+            this.#init = false;
+            this.style.opacity = 1;
+        }
+    }, 100)
+
+    setIndexAsync = async (callback) => {
+        this.spin();
+        try {
+            this.index = await callback();
+        } catch (error) {
+            this.index = -1;
+            console?.error(error);
+        }
     }
 
     static get observedAttributes() {
-        return ['colors', 'rim-color', 'size', 'index', 'style'];
+        return [
+            'index',
+            'size',
+            'colors',
+            'stroke',
+            'strokeColor',
+            'stroke-color',
+            'padding',
+            'azimuth',
+            'direction',
+            'rotationAcceleration',
+            'rotation-acceleration',
+            'rotationTime',
+            'rotation-time'
+        ];
     }
 
     attributeChangedCallback(attributeName, oldValue, newValue) {
-        if (oldValue !== newValue) {
-            switch (attributeName) {
-                case 'colors':
-                    this.setColors(newValue);
-                    break;
-                case 'rim-color':
-                    this.rimColor = newValue;
-                    break;
-                case 'size':
-                    this.size = newValue;
-                case 'style':
-                    this.cssVarsForcing(newValue);
-                    break;
-            }
-        }
-        if (attributeName === 'index') {
-            this.index = newValue;
+        if (attributeName === 'index' || oldValue !== newValue) {
+            const key = attributeName.replace(/-+[a-z]/g, v => v[v.length - 1].toUpperCase());
+            this[key] = newValue;
         }
     }
 
-    rotate(fromIndex, toIndex) {
-        if (this.#sectorsCount) {
-            const angle = 360 / this.#sectorsCount;
-            this.#rotation -= 360 + (angle *
-                (fromIndex < toIndex ?
-                    Math.abs(toIndex - fromIndex) :
-                    Math.abs((this.#sectorsCount - fromIndex) + toIndex))
-            );
-            this.#slot.style.transform = `rotate(${this.#rotation - 90}deg)`;
-        }
-    }
-
+    #index = -1;
     set index(v) {
-        const newIndex = parseInt(v || 0, 10);
-        if (this.#sectorsCount) {
-            this.#init = false;
+        if (v >= -1) {
+            const newIndex = Math.max(parseInt(v || 0, 10), -1);
             this.rotate(this.#index, newIndex);
+            this.#index = newIndex;
         }
-        this.#index = newIndex;
     }
 
     get index() {
         return this.#index;
     }
 
+    #size = this.MIN_SIZE;
     set size(v) {
-        this.#size = v || '100px';
-        this.style.setProperty('--radius', `calc(${v} / 2)`);
+        this.#size = v || this.MIN_SIZE;
+        this.style.width = this.#size;
+        this.style.height = this.#size;
+        this.realign();
     }
 
     get size() {
         return this.#size;
     }
 
-    set rimColor(v) {
-        this.#rimColor = v || 'silver';
-        this.style.setProperty('--rim-color', v);
-    }
-
-    get rimColor() {
-        return this.#rimColor;
-    }
-
-    setColors(v, doNotClean) {
-        if (!doNotClean && this.#colors.length) {
-            this.#colors.forEach((v, i) => {
-                this.style.removeProperty(`--color${i}`);
-            });
-        }
+    #colors = [];
+    set colors(v) {
         if (Array.isArray(v)) {
             this.#colors = v;
         } else {
             this.#colors = String(v).split(/\s*[;|]+\s*/).filter(Boolean);
         }
-        const list = this.#colors.map((v, i) => {
-            const name = `--color${i}`;
-            this.style.setProperty(name, v);
-            return name;
-        });
-        this.#colorsGenerator = itemsGenerator(list);
+        this.realign(true);
+    }
+
+    get colors() {
+        return this.#colors;
+    }
+
+    #stroke = 0;
+    set stroke(v) {
+        this.#stroke = Math.max(parseInt(v || 0, 10), 0);
+        this.realign(true);
+    }
+
+    get stroke() {
+        return this.#stroke;
+    }
+
+    #strokeColor = 'transparent';
+    set strokeColor(v) {
+        this.#strokeColor = v || 'transparent';
+        this.realign(true);
+    }
+
+    get strokeColor() {
+        return this.#strokeColor;
+    }
+
+    #padding = 0;
+    set padding(v) {
+        this.#padding = Math.max(parseInt(v || 0, 10), 0);
+        this.realign(true);
+    }
+
+    get padding() {
+        return this.#padding;
+    }
+
+    #azimuth;
+    set azimuth(v) {
+        this.#azimuth = v;
+    }
+
+    get azimuth() {
+        return this.#azimuth;
+    }
+
+    #direction = 'acw';
+    set direction(v) {
+        this.#direction = ['acw', 'cw'].includes(v) ? v : 'acw';
+    }
+
+    get direction() {
+        return this.#direction;
+    }
+
+    #rotationAcceleration = 1;
+    set rotationAcceleration(v) {
+        this.#rotationAcceleration = Math.max(parseInt(v || 1, 10), 1);
+    }
+
+    get rotationAcceleration() {
+        return this.#rotationAcceleration;
+    }
+
+    #rotationTime = '5s';
+    set rotationTime(v) {
+        this.#rotationTime = v || '5s';
+    }
+
+    get rotationTime() {
+        return this.#rotationTime;
+    }
+
+    get inRotation() {
+        return !!parseFloat(this.#wheel.style.transitionDuration);
+    }
+
+    get inSpinning() {
+        return !!this.#wheel.style.animation;
     }
 
     onConnect() {
@@ -245,6 +414,14 @@ class SectoredWheelElement extends CustomElement {
 
         const template = document.createElement('template');
         template.innerHTML = `<style>
+            @keyframes spin {
+                from {
+                    transform: rotate(var(--spin-angle));
+                }
+                to {
+                    transform: rotate(calc(var(--spin-angle) + 360deg));
+                }
+            }
             :host {
                 position: relative;
                 display: inline-flex;
@@ -253,48 +430,14 @@ class SectoredWheelElement extends CustomElement {
                 flex-grow: 0;
                 flex-shrink: 0;
                 user-select: none;
-                min-width: 100px;
+                min-width: ${this.MIN_SIZE};
+                min-height: ${this.MIN_SIZE};
                 border-radius: 50%;
-                background: rgba(255, 255, 255, 0.2);
-                width: calc(var(--radius) * 2);
-                --radius: 50px;
-                --sector-height: calc((6.28 * var(--radius)) / var(--sectors-count));
-                --sector-angle: calc(360deg / var(--sectors-count));
-                box-shadow:
-                    rgba(0,0,0,0.1) 0 0 0 calc(var(--radius) / 25);;
+                opacity: 0;
+                transition: opacity 0.3s linear;
+                will-change: opacity;
             }
-            :host::after {
-                --width: calc(var(--radius) / 6);
-                --border: calc(var(--width) / 10);
-                content: "";
-                position: absolute;
-                aspect-ratio: 1/1;
-                border-radius: 50%;
-                background-color: white;
-                width: var(--width);
-                box-shadow:
-                    inset rgba(0,0,0,0.1) 0 0 0 var(--border), 
-                    inset var(--rim-color) 0 0 0 calc(var(--border) * 2.5),
-                    rgba(0,0,0,0.1) 0 0 0 calc(var(--border) * 2);
-            }
-            :host::before {
-                --width: calc(var(--radius) / 6);
-                --border: calc(var(--width) / 10);
-                content: "";
-                position: absolute;
-                top: 0;
-                aspect-ratio: 1/1;
-                border-radius: 50% 50% 50% 20%;
-                transform: translateY(-60%) rotate(-45deg);
-                background-color: white;
-                width: var(--width);
-                z-index: 1;
-                box-shadow:
-                    inset rgba(0,0,0,0.1) 0 0 0 var(--border), 
-                    inset var(--rim-color) 0 0 0 calc(var(--border) * 3),
-                    rgba(0,0,0,0.1) 0 0 0 calc(var(--border) * 2);
-            }
-            :host > slot.wheel {
+            :host > div {
                 position: relative;
                 display: flex;
                 justify-content: center;
@@ -303,32 +446,35 @@ class SectoredWheelElement extends CustomElement {
                 aspect-ratio: 1/1;
                 border-radius: 50%;
                 overflow: hidden;
-                transform: rotate(-90deg);
-                transition: transform 5s cubic-bezier(0.25, 1, 0.5, 1);
-                box-shadow:
-                    inset rgba(0,0,0,0.3) 0 0 0 calc(var(--radius) * 0.01),
-                    inset var(--rim-color) 0 0 0 calc(var(--radius) * 0.05),
-                    inset rgba(0,0,0,0.1) 0 0 0 calc(var(--radius) * 0.07);
+                transition: transform;
+                will-change: transform;
             }
-        </style><slot class="wheel"></slot>`;
+            :host > div > canvas {
+                width: 100%;
+                aspect-ratio: 1/1;
+            }
+        </style><div><canvas></canvas><slot></slot></div>`;
 
         this.shadow.appendChild(template.content);
-        this.#slot = this.shadow.querySelector('slot.wheel');
-        this.#observer = new MutationObserver(this.realign);
+        this.#wheel = this.shadow.querySelector(':host > div');
+        this.#canvas = this.#wheel.querySelector('canvas');
+        this.#ctx = this.#canvas.getContext('2d');
+
+        this.#observer = new MutationObserver(() => this.realign());
         this.#observer.observe(this, {childList: true});
 
-        this.#slot.addEventListener('transitionend', () => {
-            if (!this.#init) {
-                this.emit('change', this.#index);
+        this.#wheel.addEventListener('transitionend', () => {
+            this.#wheel.style.transitionDuration = '0s';
+            if (this.inSpinning) {
+                return;
             }
-            this.#init = false;
+            if (!this.#init && !this.inSpinning) {
+                this.emit('change', this.index);
+                this.#items[this.index]?.classList.add('selected');
+            }
         });
 
         this.realign();
-
-        requestAnimationFrame(() => {
-            this.rotate(0, this.index);
-        });
     }
 
     onDisconnect() {
