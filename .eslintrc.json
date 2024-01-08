@@ -1,0 +1,25 @@
+{
+  "root": true,
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "globals": {
+    "CustomElementElement": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "env": {
+    "es6": true
+  },
+  "rules": {
+    "prettier/prettier": ["error", { "singleQuote": true }],
+    "quotes": [2, "single", { "avoidEscape": true }]
+  }
+}

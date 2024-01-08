@@ -1,6 +1,8 @@
-# sectored-wheel
-Randomized Sectored Wheel
-> No dependencies, vanilla JS, Web Component.
+# &lt;sectored-wheel&gt; element
+
+Spinned Sectored Wheel
+
+> No dependencies, Web Component.
 
 Demo / Code Example https://oleksiy-nesterov.github.io/sectored-wheel
 
@@ -8,52 +10,62 @@ Demo / Code Example https://oleksiy-nesterov.github.io/sectored-wheel
     <img width="70%" src="https://raw.githubusercontent.com/oleksiy-nesterov/sectored-wheel/main/wheel.png" />
 </p>
 
-### Installation
+## Installation
 
 ```html
-<script src="https://oleksiy-nesterov.github.io/sectored-wheel/dist/sectored-wheel.min.js"></script>
+<script type="module" src="https://oleksiy-nesterov.github.io/sectored-wheel/dist/index.js"></script>
 ```
+
 or
 
 ```
 npm install sectored-wheel
 ```
+
 or
+
 ```
-npm install git+https://github.com/oleksiy-nesterov/sectored-wheel.git#v1.0.2
+npm install git+https://github.com/oleksiy-nesterov/sectored-wheel.git#v2.0.0
 ```
 
-### Usage
+## Usage
+
+```css
+/* hide not defined HTMLElements during the module loading */
+*:not(:defined) {
+  display: none;
+}
+```
 
 ```html
-    <sectored-wheel
-        colors="red;green;blue"
-        rim-color="#ccc"
-        onclick="this.index = Math.round(Math.random() * 2)"
-        onchange="console.warn(this.index)"
-        size="600px"
-    >
-        <sectored-wheel-item>1</sectored-wheel-item>
-        <sectored-wheel-item>2</sectored-wheel-item>
-        <sectored-wheel-item>3</sectored-wheel-item>
-    </sectored-wheel>
+<sectored-wheel
+  colors="red;green;blue"
+  rim-color="#ccc"
+  onclick="this.index = Math.round(Math.random() * 2)"
+  onchange="console.warn(this.index)"
+  size="600px">
+  <sectored-wheel-item>1</sectored-wheel-item>
+  <sectored-wheel-item>2</sectored-wheel-item>
+  <sectored-wheel-item>3</sectored-wheel-item>
+</sectored-wheel>
 ```
 
-```javascript
+```js
+const wheel = document.querySelector('sectored-wheel');
 
-    const wheel = document.querySelector('sectored-wheel');
+wheel.onchange = () => {
+  console.log(this.index);
+};
 
-    wheel.onchange = () => {
-        console.log(this.index);
-    };
-    
-    wheel.index = 3;
+wheel.index = 3;
 ```
 
-### Props and Attributes
+## Configuration
+
+### Props, Methods and Attributes
 
 | Wheel's Props & Attributes                  | Description                                                                                         | Example               | Default     |
-|---------------------------------------------|-----------------------------------------------------------------------------------------------------|-----------------------|-------------|
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------- | ----------- |
 | index                                       | Selected sector                                                                                     | 1                     | 0           |
 | size                                        | Wheel size                                                                                          | 200vh                 | 100px       |
 | colors                                      | Sector color                                                                                        | red;green;blue        | transparent |
@@ -69,52 +81,46 @@ npm install git+https://github.com/oleksiy-nesterov/sectored-wheel.git#v1.0.2
 | spin                                        | Method to make wheel infinity spinning                                                              | true, false           | false       |
 | setIndexAsync                               | Method to set Index async. The first parameter is an async function which should return a new Index | true, false           | false       |
 
-| Sector's Attributes                         | Description                                      |
-|---------------------------------------------|--------------------------------------------------|
-| clipping                                    | Clip content                                     |
-| color                                       | Sector color                                     |
+| Sector's Attributes | Description  |
+| ------------------- | ------------ |
+| clipping            | Clip content |
+| color               | Sector color |
 
 ### CSS vars, which can used for custom styles
 
-| Var                    | Description             |
-|------------------------|-------------------------|
-| --count                | Amount of sectors       |
-| --sector-height        | Sector height           |
-| --sector-width         | Sector width            |
-| --sector-angle         | Stroke angle            |
+| Var             | Description       |
+| --------------- | ----------------- |
+| --count         | Amount of sectors |
+| --sector-height | Sector height     |
+| --sector-width  | Sector width      |
+| --sector-angle  | Stroke angle      |
 
 ### CSS classes, which can used for custom styles
 
-| Class                            | Description                  |
-|----------------------------------|------------------------------|
-| sectored-wheel-item.selected     | Selected sector              |
-| sectored-wheel-item.preselected  | Default (preselected) sector |
+| Class                           | Description                  |
+| ------------------------------- | ---------------------------- |
+| sectored-wheel-item.selected    | Selected sector              |
+| sectored-wheel-item.preselected | Default (preselected) sector |
 
-#
+## Integration
 
-### Integration 
-
-#### Angular Component Wrapper
+### Angular Component Wrapper
 
 ```html
 <sectored-wheel
-    #wheel
-    (change)="changed($event)"
-    colors="#7bbbd6;#294b7b;#cae4e3"
-    rim-color="#f6c946"
-    size="600px"
-    style="margin:20px;"
->
-    <sectored-wheel-item
-        *ngFor="let item of sectors; let index = index"
-        (click)="click()"
-    >
-        {{index}}
-    </sectored-wheel-item>
+  #wheel
+  (change)="changed($event)"
+  colors="#7bbbd6;#294b7b;#cae4e3"
+  rim-color="#f6c946"
+  size="600px"
+  style="margin:20px;">
+  <sectored-wheel-item *ngFor="let item of sectors; let index = index" (click)="click()">
+    {{index}}
+  </sectored-wheel-item>
 </sectored-wheel>
 ```
 
-```javascript
+```js
 import {CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 
@@ -131,17 +137,17 @@ export class MyComponentComponent implements OnInit {
     @ViewChild('wheel') wheel?: ElementRef<HTMLElement & { index: number }>;
 
     sectors: number[] = [];
-    
+
     changed = (event: Event) => {
         console.log((event as CustomEvent).detail.data);
     };
-    
+
     click = () => {
         if (this.wheel?.nativeElement) {
             this.wheel.nativeElement.index = Math.round(Math.random() * this.count);
         }
     };
-    
+
     ngOnInit() {
         this.sectors = new Array(this.count).fill(0);
     }
@@ -149,6 +155,7 @@ export class MyComponentComponent implements OnInit {
 ```
 
 Also, CUSTOM_ELEMENTS_SCHEMA can be added to the module
+
 ```javascript
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
@@ -162,16 +169,16 @@ export class SomeModule {
 ```
 
 Add sectored-wheel.min.js file to the script list of angular.json
+
 ```
 "scripts": [
     "node_modules/sectored-wheel/dist/sectored-wheel.min.js"
 ]
 ```
 
-#
+### React Component Wrapper
 
-#### React Component Wrapper
-```javascript
+```js
 import {useCallback, useEffect, useMemo, useRef} from 'react';
 import 'sectored-wheel/dist/sectored-wheel.min.js';
 
@@ -223,7 +230,8 @@ export const MyComponent = ({count}: {
 }
 ```
 
- Add IntrinsicElements into *.env.d.ts
+Add IntrinsicElements into \*.env.d.ts
+
 ```
 declare namespace JSX {
   interface IntrinsicElements {
@@ -233,8 +241,18 @@ declare namespace JSX {
 }
 ```
 
-#
-
-### Links
+## Links
 
 CodePen Playground https://codepen.io/webmotoric/pen/JjwQeQR?editors=1001
+
+## Browser support
+
+Browsers without native [custom element support][support] require a [polyfill][].
+
+- Chrome
+- Firefox
+- Safari
+- Microsoft Edge
+
+[support]: https://caniuse.com/#feat=custom-elementsv1
+[polyfill]: https://github.com/webcomponents/custom-elements

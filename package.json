@@ -1,35 +1,48 @@
 {
   "name": "sectored-wheel",
   "version": "2.0.0",
-  "description": "Randomized Sectored Wheel. No dependencies, vanilla JS, Web Component.",
-  "author": {
-    "name": "Oleksiy Nesterov",
-    "email": "oleksiy.nesterov@gmail.com"
-  },
-  "main": "dist/sectored-wheel.min.js",
+  "description": "Randomized Sectored Wheel. No dependencies, Web Component.",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "license": "ISC",
   "repository": {
     "type": "git",
     "url": "https://github.com/oleksiy-nesterov/sectored-wheel.git",
     "directory": "dist"
   },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org"
-  },
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "webpack",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rm -rf dist",
+    "lint": "eslint . --ext .ts,.js",
+    "prebuild": "npm run clean && npm run lint && mkdir dist",
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "postpublish": "npm publish --ignore-scripts"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.18.0",
+    "@typescript-eslint/parser": "^6.18.0",
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.2",
+    "prettier": "3.1.1",
+    "typescript": "^5.1.6"
+  },
+  "author": {
+    "name": "Oleksiy Nesterov",
+    "email": "oleksiy.nesterov@gmail.com"
   },
   "keywords": [
     "javascript",
     "webcomponent"
   ],
-  "license": "ISC",
   "funding": {
     "type": "patreon",
     "url": "https://www.patreon.com/user?u=40023107"
-  },
-  "devDependencies": {
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4"
   }
 }
