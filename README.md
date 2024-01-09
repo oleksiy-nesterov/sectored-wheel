@@ -25,7 +25,7 @@ npm install sectored-wheel
 or
 
 ```
-npm install git+https://github.com/oleksiy-nesterov/sectored-wheel.git#v2.0.2
+npm install git+https://github.com/oleksiy-nesterov/sectored-wheel.git#v2.0.3
 ```
 
 ## Usage
@@ -108,20 +108,25 @@ wheel.index = 3;
 
 ```html
 <sectored-wheel
-  #wheel
-  (change)="changed($event)"
-  colors="#7bbbd6;#294b7b;#cae4e3"
-  size="600px"
-  style="margin:20px;">
-  <sectored-wheel-item *ngFor="let item of sectors; let index = index" (click)="click()">
-    {{index}}
-  </sectored-wheel-item>
+    #wheel
+    (change)="changed($event)"
+    colors="#7bbbd6;#294b7b;#cae4e3"
+    size="{{'600px'}}"
+    style="margin:20px;"
+>
+    <sectored-wheel-item
+        *ngFor="let item of sectors; let index = index"
+        (click)="click()"
+    >
+        {{index}}
+    </sectored-wheel-item>
 </sectored-wheel>
 ```
 
 ```ts
 import {CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
+import 'sectored-wheel';
 
 @Component({
     selector: 'app-my-component',
@@ -165,14 +170,6 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 export class SomeModule {
     //...
 }
-```
-
-Add sectored-wheel.min.js file to the script list of angular.json
-
-```
-"scripts": [
-    "node_modules/sectored-wheel/dist/sectored-wheel.min.js"
-]
 ```
 
 ### React Component Wrapper
