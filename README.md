@@ -25,7 +25,7 @@ npm install sectored-wheel
 or
 
 ```
-npm install git+https://github.com/oleksiy-nesterov/sectored-wheel.git#v2.0.0
+npm install git+https://github.com/oleksiy-nesterov/sectored-wheel.git#v2.0.2
 ```
 
 ## Usage
@@ -64,22 +64,22 @@ wheel.index = 3;
 
 ### Props, Methods and Attributes
 
-| Wheel's Props & Attributes                  | Description                                                                                         | Example               | Default     |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------- | ----------- |
-| index                                       | Selected sector                                                                                     | 1                     | 0           |
-| size                                        | Wheel size                                                                                          | 200vh                 | 100px       |
-| colors                                      | Sector color                                                                                        | red;green;blue        | transparent |
-| stroke                                      | Stroke size in px                                                                                   | 10                    | 0           |
-| strokeColor, stroke-color                   | Stroke color                                                                                        | red, rgba(0,0,0,0.5)  | transparent |
-| padding                                     | inset padding in pixels                                                                             | 10                    | 0           |
-| direction                                   | Rotate direction                                                                                    | cw, acw               | cw          |
-| azimuth                                     | Wheel azimuth                                                                                       | -90deg, 0.25turn, etc | 0           |
-| rotationAcceleration, rotation-acceleration | how many full rotations should be done each time                                                    | 2                     | 1           |
-| rotationTime, rotation-time                 | Rotation time                                                                                       | 10s, 200ms, etc       | 5s          |
-| inRotation                                  | Read Only, allow to determine the wheel rotation                                                    | true, false           | false       |
-| inSpinning                                  | Read Only, allow to determine the wheel spinning                                                    | true, false           | false       |
-| spin                                        | Method to make wheel infinity spinning                                                              | true, false           | false       |
-| setIndexAsync                               | Method to set Index async. The first parameter is an async function which should return a new Index | true, false           | false       |
+| Wheel's Props & Attributes                  | Description                                                                                                                                                                                                                                 | Example               | Default     |
+| ------------------------------------------- |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|-------------|
+| index                                       | Selected sector                                                                                                                                                                                                                             | 1                     | 0           |
+| size                                        | Wheel size                                                                                                                                                                                                                                  | 200vh                 | 100px       |
+| colors                                      | Sector color                                                                                                                                                                                                                                | red;green;blue        | transparent |
+| stroke                                      | Stroke size in px                                                                                                                                                                                                                           | 10                    | 0           |
+| strokeColor, stroke-color                   | Stroke color                                                                                                                                                                                                                                | red, rgba(0,0,0,0.5)  | transparent |
+| padding                                     | inset padding in pixels                                                                                                                                                                                                                     | 10                    | 0           |
+| direction                                   | Rotate direction                                                                                                                                                                                                                            | cw, acw               | cw          |
+| azimuth                                     | Wheel azimuth                                                                                                                                                                                                                               | -90deg, 0.25turn, etc | 0           |
+| rotationAcceleration, rotation-acceleration | how many full rotations should be done each time                                                                                                                                                                                            | 2                     | 1           |
+| rotationTime, rotation-time                 | Rotation time                                                                                                                                                                                                                               | 10s, 200ms, etc       | 5s          |
+| inRotation                                  | Read Only, allow to determine the wheel rotation                                                                                                                                                                                            |                       |             |
+| inSpinning                                  | Read Only, allow to determine the wheel spinning                                                                                                                                                                                            |                       |             |
+| spin                                        | Method to make wheel infinity spinning                                                                                                                                                                                                      |                       |             |
+| setIndexAsync                               | Method to set Index async. The first parameter is an async or regular function which should return a new Index, the first parameter can be just a number. The second parameter is a minimal time of wheel spin in ms (default value is 0).  |                       |             |
 
 | Sector's Attributes | Description  |
 | ------------------- | ------------ |
@@ -111,7 +111,6 @@ wheel.index = 3;
   #wheel
   (change)="changed($event)"
   colors="#7bbbd6;#294b7b;#cae4e3"
-  rim-color="#f6c946"
   size="600px"
   style="margin:20px;">
   <sectored-wheel-item *ngFor="let item of sectors; let index = index" (click)="click()">
@@ -120,7 +119,7 @@ wheel.index = 3;
 </sectored-wheel>
 ```
 
-```js
+```ts
 import {CUSTOM_ELEMENTS_SCHEMA, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {CommonModule} from '@angular/common';
 
@@ -156,7 +155,7 @@ export class MyComponentComponent implements OnInit {
 
 Also, CUSTOM_ELEMENTS_SCHEMA can be added to the module
 
-```javascript
+```ts
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 @NgModule({
@@ -178,7 +177,7 @@ Add sectored-wheel.min.js file to the script list of angular.json
 
 ### React Component Wrapper
 
-```js
+```ts
 import {useCallback, useEffect, useMemo, useRef} from 'react';
 import 'sectored-wheel/dist/sectored-wheel.min.js';
 
@@ -191,15 +190,17 @@ export const MyComponent = ({count}: {
 
   useEffect(() => {
     if (wheel.current) {
-      const el = wheel.current;
-      const onChange = (event: Event) => {
-        const index = (event as CustomEvent).detail?.data;
-        console.log(index);
-      };
-      el.addEventListener('change', onChange);
-      return () => {
-        el.removeEventListener('change', onChange);
-      }
+        const el = wheel.current;
+        const onChange = (event: Event) => {
+            const index = (event as CustomEvent).detail?.data;
+            console.log(index);
+        };
+        el.onchange = onChange;
+        // or use event
+        // el.addEventListener('change', onChange);
+        // return () => {
+        //   el.removeEventListener('change', onChange);
+        // }
     }
   }, []);
 
@@ -219,7 +220,6 @@ export const MyComponent = ({count}: {
     <sectored-wheel
       ref={wheel}
       colors="#7bbbd6;#294b7b;#cae4e3"
-      rim-color="#f6c946"
       size="600px"
       onClick={click}
       style={{margin: '20px'}}
@@ -230,13 +230,20 @@ export const MyComponent = ({count}: {
 }
 ```
 
-Add IntrinsicElements into \*.env.d.ts
+Add [your wrapper name].d.ts file to the same folder, to allow React to recognize the props of the web component
 
-```
-declare namespace JSX {
-  interface IntrinsicElements {
-    'sectored-wheel': any;
-    'sectored-wheel-item': any;
+```ts
+import {DOMAttributes} from 'react';
+import {SectoredWheelElement, SectoredWheelItemElement} from 'sectored-wheel';
+
+type CustomElement<T> = Partial<T & DOMAttributes<T> & { children: unknown }>;
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      ['sectored-wheel']: CustomElement<SectoredWheelElement>;
+      ['sectored-wheel-item']: CustomElement<SectoredWheelItemElement>;
+    }
   }
 }
 ```

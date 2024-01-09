@@ -17,6 +17,19 @@ const debounceCallback = (callback, time = 0) => {
         debounceTimer = setTimeout(callback, time);
     };
 };
+const timedPromise = async (promiseOrValue, time = 0) => {
+    const timeout = new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, time);
+    });
+    const promise = promiseOrValue && promiseOrValue.then
+        ? promiseOrValue
+        : Promise.resolve(typeof promiseOrValue === 'function' ? promiseOrValue() : promiseOrValue);
+    return Promise.all([promise, timeout]).then((values) => {
+        return values[0];
+    });
+};
 const MIN_WHEEL_SIZE = '100px';
 const PI2 = Math.PI * 2;
 class CustomElement extends HTMLElement {
@@ -40,7 +53,7 @@ class CustomElement extends HTMLElement {
         else {
             const source = this.getAttribute(`on${eventName}`);
             if (source) {
-                new Function('e', `var event = e; return ${source}`)(event);
+                new Function('e', `var event = e; return ${source}`).call(this, event);
             }
             else {
                 this.dispatchEvent(event);
@@ -249,10 +262,10 @@ export class SectoredWheelElement extends CustomElement {
                 this.style.opacity = '1';
             }
         }, 100);
-        this.setIndexAsync = async (callback) => {
+        this.setIndexAsync = async (promiseOrIndex, minSpinTime = 0) => {
             this.spin();
             try {
-                this.index = await callback();
+                this.index = await timedPromise(promiseOrIndex, minSpinTime);
             }
             catch (error) {
                 this.index = -1;

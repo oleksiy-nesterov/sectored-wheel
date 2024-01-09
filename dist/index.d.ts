@@ -22,7 +22,7 @@ export declare class SectoredWheelElement extends CustomElement {
     rotate: (fromIndex: number, toIndex: number, noAnimate?: boolean, reset?: boolean) => void;
     spin: () => void;
     realign: (...args: unknown[]) => void;
-    setIndexAsync: (callback: () => Promise<number>) => Promise<void>;
+    setIndexAsync: (promiseOrIndex: number | Promise<number> | (() => number), minSpinTime?: number) => Promise<void>;
     static get observedAttributes(): string[];
     attributeChangedCallback(attributeName: string, oldValue: string, newValue: string): void;
     set index(v: number | string);

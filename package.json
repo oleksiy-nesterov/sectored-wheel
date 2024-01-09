@@ -1,6 +1,6 @@
 {
   "name": "sectored-wheel",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Randomized Sectored Wheel. No dependencies, Web Component.",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -13,7 +13,9 @@
     "directory": "dist"
   },
   "files": [
-    "dist"
+    "dist",
+    "index.html",
+    "src/index.ts"
   ],
   "scripts": {
     "clean": "rm -rf dist",

@@ -228,14 +228,7 @@
         if (wheel.inSpinning || wheel.inRotation) {
           return;
         }
-        wheel.setIndexAsync(async () => {
-          return new Promise((resolve, reject) => {
-            setTimeout(() => {
-              resolve(Math.round(Math.random() * 11));
-              // reject('Just a Error');
-            }, 3000);
-          });
-        });
+        wheel.setIndexAsync(Math.round(Math.random() * 11), 3000);
       };
     </script>
     <script type="module" src="dist/index.js"></script>
@@ -264,7 +257,6 @@
         <sectored-wheel
           direction="acw"
           colors="#525252;#8b8b8b;#7d7d7d"
-          onclick="this.spin(); setTimeout(() => {this.index = Math.round(Math.random() * 11)}, 2000) "
           onchange="onChange(this)"
           size="600px"
           azimuth="-90deg"
